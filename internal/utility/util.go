@@ -1,0 +1,47 @@
+package utility
+
+import (
+	"encoding/json"
+	"errors"
+	"github.com/nik/image-fetcher-service/internal/model"
+	"net/url"
+	"os"
+)
+
+// Loads the configuration from the properties  file
+func LoadConfiguration(file string) (*model.Config,error) {
+	var config model.Config
+	configFile, err := os.Open(file)
+	if(err!=nil) {
+		return nil,err
+	}
+
+	defer configFile.Close()
+	jsonParser := json.NewDecoder(configFile)
+	jsonParser.Decode(&config)
+
+	return &config,nil
+}
+
+// BuildUrlWithQueryParameters builds url by combining the base url and query parameters
+func BuildUrlWithQueryParameters(baseUrl string, keyToValue map[string]string) (string, error) {
+	url, err := url.Parse(baseUrl)
+	if err == nil {
+		if (keyToValue == nil || len(keyToValue) == 0) {
+			// if there are no query parameters passed
+			return baseUrl, nil
+		}
+
+		//build url by adding query param
+		queryParam := url.Query()
+		for key, value := range keyToValue {
+			queryParam.Set(key, value)
+		}
+
+		url.RawQuery = queryParam.Encode()
+		return url.String(), nil
+
+	} else {
+		return "", errors.New("Wrong url format")
+	}
+}
