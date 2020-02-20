@@ -1,6 +1,10 @@
 package downloader
 
 import (
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -111,36 +115,56 @@ func Test_getKeyToValueFromQueryParameters(t *testing.T) {
 	}
 }
 
-func TestGoogleImageDownloader_GetLinks(t *testing.T) {
-	type fields struct {
-		url             string
-		queryParameters *QueryParameters
+func TestGoogleImageDownloader_GetSearchResponse(t *testing.T) {
+	server := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Write(loadMockResponse())
+		}),
+	)
+	// Close the server when test finishes
+	defer server.Close()
+	d:= NewDownloader(server.URL,"test","xyz")
+	queryResponse, _:= d.GetSearchResponse()
+	//get actual values
+	apiKeyGot:= queryResponse.Query.Apikey
+	deviceGot:= queryResponse.Query.Device
+	//get desired values
+	apiKeyWant:= queryResponse.Query.Apikey
+	deviceWant:= queryResponse.Query.Device
+
+	if(!reflect.DeepEqual(apiKeyGot, apiKeyWant)) {
+		t.Errorf("GetSearchResponse() = %v, want %v", apiKeyGot, apiKeyWant)
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		want    []string
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			downloader := &GoogleImageDownloader{
-				url:             tt.fields.url,
-				queryParameters: tt.fields.queryParameters,
-			}
-			got, err := downloader.GetLinks()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GoogleImageDownloader.GetLinks() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GoogleImageDownloader.GetLinks() = %v, want %v", got, tt.want)
-			}
-		})
+
+	if(!reflect.DeepEqual(deviceGot, deviceWant)) {
+		t.Errorf("GetSearchResponse() = %v, want %v", deviceGot, deviceWant)
 	}
 }
+
+func TestGoogleImageDownloader_GetLinks(t *testing.T) {
+	server := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Write(loadMockResponse())
+		}),
+	)
+	// Close the server when test finishes
+	defer server.Close()
+	d:= NewDownloader(server.URL,"test","xyz")
+	queryResponse, _:= d.GetSearchResponse()
+	linksWant:= []string {"https://www.outbrain.com/techblog/2017/05/effective-testing-with-loan-pattern-in-scala/",
+		"https://the-test-fun-for-friends.en.softonic.com/android",
+		"https://www.spectrum.com/internet/speed-test.html"	}
+	//get actual values
+	linksGot:= []string{}
+	for _, imageResult:= range queryResponse.ImageResults {
+		linksGot = append(linksGot,imageResult.Link)
+	}
+
+	if(!reflect.DeepEqual(linksGot, linksWant)) {
+		t.Errorf("GetLinks() = %v, want %v", linksGot, linksWant)
+	}
+}
+
 
 func TestNewDownloader(t *testing.T) {
 	type args struct {
@@ -169,4 +193,17 @@ func getFilePath() string {
 	d := path.Join(filepath.Join(b, "../../"))
 	rootDir:= filepath.Dir(d)
 	return filepath.FromSlash(rootDir+"/test/test_response.json")
+}
+
+func loadMockResponse() ([]byte) {
+	jsonFile, err := os.Open("test_response.json")
+	// defer the closing of our jsonFile so that we can parse it later on
+	defer jsonFile.Close()
+
+	// if we os.Open returns an error then raise panic
+	if err != nil {
+		panic(err)
+	}
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	return byteValue
 }
