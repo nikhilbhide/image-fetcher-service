@@ -93,6 +93,20 @@ func (downloader *GoogleImageDownloader) GetLinks() ([]string, error) {
 	return links, nil
 }
 
+// It downloads the images in the memory and returns the byte array
+func (downloader *GoogleImageDownloader) GetImages(urls []string) (map[string][]byte, error) {
+	urlToImage := make(map[string][]byte)
+	for _, url := range urls {
+		image, err := utility.DownloadImage(url)
+		if (err != nil) {
+			return nil, err
+		}
+		urlToImage[url] = image
+	}
+
+	return urlToImage, nil
+}
+
 // Builds object for downloader based on the url and query parameters
 // If successful, methods on the returned File can be used for I/O.
 // If there is an error, it will be of type *PathError.
@@ -100,7 +114,7 @@ func NewDownloader(url string, apiKey string, query string) (*GoogleImageDownloa
 	queryParam := &QueryParameters{
 		apiKey:     apiKey,
 		searchTerm: query,
-		tbm:"isch",
+		tbm:        "isch",
 	}
 
 	downloader := GoogleImageDownloader{

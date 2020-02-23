@@ -1,9 +1,12 @@
 package utility
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"github.com/nik/image-fetcher-service/internal/model"
+	"net/http"
 	"net/url"
 	"os"
 )
@@ -44,4 +47,29 @@ func BuildUrlWithQueryParameters(baseUrl string, keyToValue map[string]string) (
 	} else {
 		return "", errors.New("Wrong url format")
 	}
+}
+
+//Download the images as byte array
+func DownloadImage(urlPath string) ([]byte, error) {
+	resp, _ := http.Get(urlPath)
+	defer resp.Body.Close()
+
+	content := make([]byte, resp.ContentLength);
+	_, err := resp.Body.Read(content)
+	if (err != nil) {
+		return nil, errors.New("Error in downloading images")
+	}
+
+	return content,nil
+}
+
+//Convert object to byte array
+func GetBytes(key interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(key)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
