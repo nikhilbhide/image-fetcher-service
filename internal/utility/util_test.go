@@ -19,25 +19,23 @@ func TestLoadConfiguration(t *testing.T) {
 		want    *model.Config
 		wantErr bool
 	}{
-		{name:"test_success_test_json",
-			args:args{
+		{name: "test_success_test_json",
+			args: args{
 				file: getFilePath(),
-
 			},
-			want:&model.Config{
-				ApiKey:"test",
-				Url:"https://app.zenserp.com/api/v2/search",
-				PageSize:100,
-				TotalNumResults:100,
-				SearchImageQuery:"test_search",
+			want: &model.Config{
+				ApiKey:           "test",
+				Url:              "https://app.zenserp.com/api/v2/search",
+				PageSize:         100,
+				TotalNumResults:  100,
+				SearchImageQuery: "test_search",
 			},
 		},
-		{name:"test_success_test_json",
-			args:args{
+		{name: "test_success_test_json",
+			args: args{
 				file: "file_not_exists.json",
-
 			},
-			wantErr:true,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -86,7 +84,7 @@ func TestBuildUrlWithQueryParameters(t *testing.T) {
 				baseUrl: "http://www.google.com",
 				keyToValue: map[string]string{
 					"query": "1355",
-					"r": "2138",
+					"r":     "2138",
 				},
 			},
 			"http://www.google.com?query=1355&r=2138",
@@ -110,6 +108,6 @@ func TestBuildUrlWithQueryParameters(t *testing.T) {
 func getFilePath() string {
 	_, b, _, _ := runtime.Caller(0)
 	d := path.Join(filepath.Join(b, "../../"))
-	rootDir:= filepath.Dir(d)
-	return filepath.FromSlash(rootDir+"/config/test.json")
+	rootDir := filepath.Dir(d)
+	return filepath.FromSlash(rootDir + "/config/test.json")
 }

@@ -25,14 +25,14 @@ type QueryParameters struct {
 }
 
 func populateMap(keyToValue map[string]string, key string, value string) {
-	if (key != "" && value != "") {
+	if key != "" && value != "" {
 		keyToValue[key] = value
 	}
 }
 
 // Creates the map of key to value to be used in building url
 func getKeyToValueFromQueryParameters(queryParam *QueryParameters) (map[string]string, error) {
-	if (queryParam == nil || (queryParam.searchTerm == "" || queryParam.apiKey == "")) {
+	if queryParam == nil || (queryParam.searchTerm == "" || queryParam.apiKey == "") {
 		return nil, errors.New("Mandatory query parameters are missing")
 	} else {
 		keyToValue := make(map[string]string)
@@ -52,12 +52,12 @@ func (downloader *GoogleImageDownloader) GetSearchResponse() (*model.QueryRespon
 	var queryResponse model.QueryResponse
 	keyToValue, err := getKeyToValueFromQueryParameters(downloader.queryParameters)
 	//return in case of error
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 
 	url, err := utility.BuildUrlWithQueryParameters(downloader.url, keyToValue)
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 
@@ -79,7 +79,7 @@ func (downloader *GoogleImageDownloader) GetSearchResponse() (*model.QueryRespon
 // Before it queries the api, it validates the query parameters and builds the url.
 func (downloader *GoogleImageDownloader) GetLinks() ([]string, error) {
 	queryResponse, err := downloader.GetSearchResponse()
-	if (err != nil) {
+	if err != nil {
 		//return in case of error
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (downloader *GoogleImageDownloader) GetImages(urls []string) (map[string][]
 	urlToImage := make(map[string][]byte)
 	for _, url := range urls {
 		image, err := utility.DownloadImage(url)
-		if (err != nil) {
+		if err != nil {
 			return nil, err
 		}
 		urlToImage[url] = image
@@ -110,7 +110,7 @@ func (downloader *GoogleImageDownloader) GetImages(urls []string) (map[string][]
 // Builds object for downloader based on the url and query parameters
 // If successful, methods on the returned File can be used for I/O.
 // If there is an error, it will be of type *PathError.
-func NewDownloader(url string, apiKey string, query string) (*GoogleImageDownloader) {
+func NewDownloader(url string, apiKey string, query string) *GoogleImageDownloader {
 	queryParam := &QueryParameters{
 		apiKey:     apiKey,
 		searchTerm: query,

@@ -18,5 +18,3 @@ type QueryResponse struct {
 		Source    string `json:"source"`
 	} `json:"image_results"`
 }
-
-

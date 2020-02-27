@@ -42,63 +42,58 @@ func Test_getKeyToValueFromQueryParameters(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:"test_success_no_parameters",
-			want: nil,
-			wantErr:true,
+			name:    "test_success_no_parameters",
+			want:    nil,
+			wantErr: true,
 		},
 		{
-			name:"test_success_empty_parameters",
-			args:args{
-
+			name:    "test_success_empty_parameters",
+			args:    args{},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "test_success_parameters_with_no_values",
+			args: args{
+				queryParam: &QueryParameters{},
 			},
-			want: nil,
-			wantErr:true,
-
+			want:    nil,
+			wantErr: true,
 		},
 		{
-			name:"test_success_parameters_with_no_values",
-			args:args{
-				queryParam:&QueryParameters{
-
-				},
-			},
-			want: nil,
-			wantErr:true,
-		},
-		{
-			name:"test_success_parameters_with_values",
-			args:args{
-				queryParam:&QueryParameters{
-					apiKey:"akldjsad",
-					searchTerm:"q",
-					device:"pc",
+			name: "test_success_parameters_with_values",
+			args: args{
+				queryParam: &QueryParameters{
+					apiKey:     "akldjsad",
+					searchTerm: "q",
+					device:     "pc",
 				},
 			},
 			want: map[string]string{
-				"apikey":"akldjsad",
-				"q":"q",
-				"device":"pc",
-				"start":"0",
+				"apikey": "akldjsad",
+				"q":      "q",
+				"device": "pc",
+				"start":  "0",
 			},
-			wantErr:false,
+			wantErr: false,
 		},
 		{
-			name:"test_success_parameters_with_start_num",
-			args:args{
-				queryParam:&QueryParameters{
-					apiKey:"akldjsad",
-					searchTerm:"q",
-					device:"pc",
-					startNum:100,
+			name: "test_success_parameters_with_start_num",
+			args: args{
+				queryParam: &QueryParameters{
+					apiKey:     "akldjsad",
+					searchTerm: "q",
+					device:     "pc",
+					startNum:   100,
 				},
 			},
 			want: map[string]string{
-				"apikey":"akldjsad",
-				"q":"q",
-				"device":"pc",
-				"start":"100",
+				"apikey": "akldjsad",
+				"q":      "q",
+				"device": "pc",
+				"start":  "100",
 			},
-			wantErr:false,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -123,20 +118,20 @@ func TestGoogleImageDownloader_GetSearchResponse(t *testing.T) {
 	)
 	// Close the server when test finishes
 	defer server.Close()
-	d:= NewDownloader(server.URL,"test","xyz")
-	queryResponse, _:= d.GetSearchResponse()
+	d := NewDownloader(server.URL, "test", "xyz")
+	queryResponse, _ := d.GetSearchResponse()
 	//get actual values
-	apiKeyGot:= queryResponse.Query.Apikey
-	deviceGot:= queryResponse.Query.Device
+	apiKeyGot := queryResponse.Query.Apikey
+	deviceGot := queryResponse.Query.Device
 	//get desired values
-	apiKeyWant:= queryResponse.Query.Apikey
-	deviceWant:= queryResponse.Query.Device
+	apiKeyWant := queryResponse.Query.Apikey
+	deviceWant := queryResponse.Query.Device
 
-	if(!reflect.DeepEqual(apiKeyGot, apiKeyWant)) {
+	if !reflect.DeepEqual(apiKeyGot, apiKeyWant) {
 		t.Errorf("GetSearchResponse() = %v, want %v", apiKeyGot, apiKeyWant)
 	}
 
-	if(!reflect.DeepEqual(deviceGot, deviceWant)) {
+	if !reflect.DeepEqual(deviceGot, deviceWant) {
 		t.Errorf("GetSearchResponse() = %v, want %v", deviceGot, deviceWant)
 	}
 }
@@ -149,18 +144,18 @@ func TestGoogleImageDownloader_GetLinks(t *testing.T) {
 	)
 	// Close the server when test finishes
 	defer server.Close()
-	d:= NewDownloader(server.URL,"test","xyz")
-	queryResponse, _:= d.GetSearchResponse()
-	linksWant:= []string {"https://www.outbrain.com/techblog/2017/05/effective-testing-with-loan-pattern-in-scala/",
+	d := NewDownloader(server.URL, "test", "xyz")
+	queryResponse, _ := d.GetSearchResponse()
+	linksWant := []string{"https://www.outbrain.com/techblog/2017/05/effective-testing-with-loan-pattern-in-scala/",
 		"https://the-test-fun-for-friends.en.softonic.com/android",
-		"https://www.spectrum.com/internet/speed-test.html"	}
+		"https://www.spectrum.com/internet/speed-test.html"}
 	//get actual values
-	linksGot:= []string{}
-	for _, imageResult:= range queryResponse.ImageResults {
-		linksGot = append(linksGot,imageResult.Link)
+	linksGot := []string{}
+	for _, imageResult := range queryResponse.ImageResults {
+		linksGot = append(linksGot, imageResult.Link)
 	}
 
-	if(!reflect.DeepEqual(linksGot, linksWant)) {
+	if !reflect.DeepEqual(linksGot, linksWant) {
 		t.Errorf("GetLinks() = %v, want %v", linksGot, linksWant)
 	}
 }
@@ -190,24 +185,24 @@ func TestGoogleImageDownloader_GetImages(t *testing.T) {
 	// Close the server when test finishes
 	defer server3.Close()
 
-	linksWant:= loadGetImageMockResponse()
-	var	linksGot [][]byte
+	linksWant := loadGetImageMockResponse()
+	var linksGot [][]byte
 
-	d:= NewDownloader("test","test","xyz")
-	urls:= []string {server1.URL,server2.URL,server3.URL}
-	urlToImages, _:= d.GetImages(urls)
+	d := NewDownloader("test", "test", "xyz")
+	urls := []string{server1.URL, server2.URL, server3.URL}
+	urlToImages, _ := d.GetImages(urls)
 
-	if(urlToImages==nil) {
+	if urlToImages == nil {
 		t.Errorf("GetImages() length of the returned images = %v, want %v", 0, len(linksWant))
-	} else if(len(urlToImages)!=len(linksWant)) {
+	} else if len(urlToImages) != len(linksWant) {
 		t.Errorf("GetImages() length of the returned images = %v, want %v", len(urlToImages), len(linksWant))
 	}
 
-	linksGot = append(linksGot,urlToImages[server1.URL])
-	linksGot = append(linksGot,urlToImages[server2.URL])
-	linksGot = append(linksGot,urlToImages[server3.URL])
+	linksGot = append(linksGot, urlToImages[server1.URL])
+	linksGot = append(linksGot, urlToImages[server2.URL])
+	linksGot = append(linksGot, urlToImages[server3.URL])
 
-	if(!reflect.DeepEqual(linksGot, linksWant)) {
+	if !reflect.DeepEqual(linksGot, linksWant) {
 		t.Errorf("GetImages() = %v, want %v", linksGot, linksWant)
 	}
 }
@@ -237,11 +232,11 @@ func TestNewDownloader(t *testing.T) {
 func getFilePath() string {
 	_, b, _, _ := runtime.Caller(0)
 	d := path.Join(filepath.Join(b, "../../"))
-	rootDir:= filepath.Dir(d)
-	return filepath.FromSlash(rootDir+"/test/test_response.json")
+	rootDir := filepath.Dir(d)
+	return filepath.FromSlash(rootDir + "/test/test_response.json")
 }
 
-func loadMockResponse() ([]byte) {
+func loadMockResponse() []byte {
 	jsonFile, err := os.Open("test_response.json")
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
@@ -255,11 +250,11 @@ func loadMockResponse() ([]byte) {
 }
 
 //mock image response
-func loadGetImageMockResponse() ([][]byte) {
+func loadGetImageMockResponse() [][]byte {
 	image1 := []byte{'r', 'o', 'a', 'd'}
 	image2 := []byte{'t', 'e', 's', 't'}
 	image3 := []byte{'n', 'i', 'l'}
-	images:= [][]byte {image1,image2,image3}
+	images := [][]byte{image1, image2, image3}
 
 	return images
 }

@@ -6,31 +6,32 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/nik/image-fetcher-service/internal/model"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 )
 
 // Loads the configuration from the properties  file
-func LoadConfiguration(file string) (*model.Config,error) {
+func LoadConfiguration(file string) (*model.Config, error) {
 	var config model.Config
 	configFile, err := os.Open(file)
-	if(err!=nil) {
-		return nil,err
+	if err != nil {
+		return nil, err
 	}
 
 	defer configFile.Close()
 	jsonParser := json.NewDecoder(configFile)
 	jsonParser.Decode(&config)
 
-	return &config,nil
+	return &config, nil
 }
 
 // BuildUrlWithQueryParameters builds url by combining the base url and query parameters
 func BuildUrlWithQueryParameters(baseUrl string, keyToValue map[string]string) (string, error) {
 	url, err := url.Parse(baseUrl)
 	if err == nil {
-		if (keyToValue == nil || len(keyToValue) == 0) {
+		if keyToValue == nil || len(keyToValue) == 0 {
 			// if there are no query parameters passed
 			return baseUrl, nil
 		}
@@ -51,16 +52,18 @@ func BuildUrlWithQueryParameters(baseUrl string, keyToValue map[string]string) (
 
 //Download the images as byte array
 func DownloadImage(urlPath string) ([]byte, error) {
-	resp, _ := http.Get(urlPath)
-	defer resp.Body.Close()
+	resp, err := http.Get(urlPath)
+	if err != nil {
+		return nil, err
+	}
 
-	content := make([]byte, resp.ContentLength);
-	_, err := resp.Body.Read(content)
-	if (err != nil) {
+	defer resp.Body.Close()
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return nil, errors.New("Error in downloading images")
 	}
 
-	return content,nil
+	return responseData, nil
 }
 
 //Convert object to byte array

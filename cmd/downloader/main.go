@@ -1,12 +1,12 @@
-package downloader
+package main
 
 import (
-"fmt"
-"io"
-"net/http"
-"net/url"
-"os"
-"strings"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 
 func main() {
 
-	fullUrlFile = "http://www.golangprograms.com/skin/frontend/base/default/logo.png"
+	fullUrlFile = "https://www.incimages.com/uploaded_files/image/970x450/getty_152414899_97046097045006_68075.jpg"
 
 	// Build fileName from fullPath
 	buildFileName()
@@ -78,4 +78,3 @@ func checkError(err error) {
 		panic(err)
 	}
 }
-
