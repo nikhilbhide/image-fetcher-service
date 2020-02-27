@@ -165,6 +165,52 @@ func TestGoogleImageDownloader_GetLinks(t *testing.T) {
 	}
 }
 
+func TestGoogleImageDownloader_GetImages(t *testing.T) {
+	server1 := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Write(loadGetImageMockResponse()[0])
+		}),
+	)
+	// Close the server when test finishes
+	defer server1.Close()
+
+	server2 := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Write(loadGetImageMockResponse()[1])
+		}),
+	)
+	// Close the server when test finishes
+	defer server2.Close()
+
+	server3 := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Write(loadGetImageMockResponse()[2])
+		}),
+	)
+	// Close the server when test finishes
+	defer server3.Close()
+
+	linksWant:= loadGetImageMockResponse()
+	var	linksGot [][]byte
+
+	d:= NewDownloader("test","test","xyz")
+	urls:= []string {server1.URL,server2.URL,server3.URL}
+	urlToImages, _:= d.GetImages(urls)
+
+	if(urlToImages==nil) {
+		t.Errorf("GetImages() length of the returned images = %v, want %v", 0, len(linksWant))
+	} else if(len(urlToImages)!=len(linksWant)) {
+		t.Errorf("GetImages() length of the returned images = %v, want %v", len(urlToImages), len(linksWant))
+	}
+
+	linksGot = append(linksGot,urlToImages[server1.URL])
+	linksGot = append(linksGot,urlToImages[server2.URL])
+	linksGot = append(linksGot,urlToImages[server3.URL])
+
+	if(!reflect.DeepEqual(linksGot, linksWant)) {
+		t.Errorf("GetImages() = %v, want %v", linksGot, linksWant)
+	}
+}
 
 func TestNewDownloader(t *testing.T) {
 	type args struct {
@@ -206,4 +252,14 @@ func loadMockResponse() ([]byte) {
 	}
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	return byteValue
+}
+
+//mock image response
+func loadGetImageMockResponse() ([][]byte) {
+	image1 := []byte{'r', 'o', 'a', 'd'}
+	image2 := []byte{'t', 'e', 's', 't'}
+	image3 := []byte{'n', 'i', 'l'}
+	images:= [][]byte {image1,image2,image3}
+
+	return images
 }
