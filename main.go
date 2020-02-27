@@ -33,20 +33,25 @@ func main() {
 	mydir, _ := os.Getwd()
 	println(mydir)
 
-	configPath := filepath.FromSlash(mydir+"/config/config.json")
+	configPath := filepath.FromSlash(mydir + "/config/config.json")
 
-	config,error:= utility.LoadConfiguration(configPath)
-	if(error!=nil) {
+	config, error := utility.LoadConfiguration(configPath)
+	if error != nil {
 		panic(error)
 	}
 
-	downloader := downloader.NewDownloader(config.Url,config.ApiKey, config.SearchImageQuery)
+	downloader := downloader.NewDownloader(config.Url, config.ApiKey, config.SearchImageQuery)
 
-	links,_:= downloader.GetLinks()
+	links, _ := downloader.GetLinks()
 	println(links)
 
-	queryResponse,_:= downloader.GetSearchResponse()
+	/*queryResponse,_:= downloader.GetSearchResponse()
 	for _, element:= range queryResponse.ImageResults {
 		println(element.Link)
+	}*/
+
+	images, err := downloader.GetImages(links)
+	if err != nil {
+		println("Images are downloaded and total size is %d", len(images))
 	}
 }
