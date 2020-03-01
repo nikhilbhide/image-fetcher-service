@@ -5,10 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path"
-	"path/filepath"
 	"reflect"
-	"runtime"
 	"testing"
 )
 
@@ -229,15 +226,8 @@ func TestNewDownloader(t *testing.T) {
 	}
 }
 
-func getFilePath() string {
-	_, b, _, _ := runtime.Caller(0)
-	d := path.Join(filepath.Join(b, "../../"))
-	rootDir := filepath.Dir(d)
-	return filepath.FromSlash(rootDir + "/test/test_response.json")
-}
-
 func loadMockResponse() []byte {
-	jsonFile, err := os.Open("test_response.json")
+	jsonFile, err := os.Open("/app/image-fetcher-service/test/test_response.json")
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
 
