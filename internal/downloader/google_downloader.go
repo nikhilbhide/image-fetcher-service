@@ -2,10 +2,10 @@ package downloader
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/nik/image-fetcher-service/internal/model"
 	"github.com/nik/image-fetcher-service/internal/utility"
-	"github.com/pkg/errors"
 	"net/http"
 	"strconv"
 )
